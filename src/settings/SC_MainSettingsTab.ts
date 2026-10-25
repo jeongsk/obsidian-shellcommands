@@ -257,7 +257,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                         }
 
                         // Show or hide the shell command.
-                        const shell_command_element = document.querySelector("div.SC-id-" + shell_command_id);
+                        const shell_command_element = this.containerEl.querySelector("div.SC-id-" + shell_command_id);
                         if (!shell_command_element) {
                             throw new Error("Shell command setting element does not exist with selector div.SC-id-" + shell_command_id);
                         }
@@ -703,7 +703,8 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                     if (appearanceTabOpened) {
                         // Try to look for the monospace font setting. This is a bit quirky and might not work if Obsidian changes the setting's name (or if user has other display language than English).
                         let settingFound = false;
-                        document.querySelectorAll("div.setting-item-name").forEach((divSettingItemName: HTMLElement) => {
+                        // Settings might be in a popout window, so don't use the global 'document'.
+                        this.containerEl.ownerDocument.querySelectorAll("div.setting-item-name").forEach((divSettingItemName: HTMLElement) => {
                             if (divSettingItemName.innerHTML.match(/^\s*Monospace font\s*$/i) && !settingFound) { // !settingFound: Don't search anymore if an element was already scrolled into view.
                                 // Found the monospace font setting.
                                 // Ensure it's in the view and make it bold.
@@ -762,14 +763,21 @@ export class SC_MainSettingsTab extends PluginSettingTab {
 
         // Go to last position now
         this.tab_structure.buttons[last_position.tab_name].click();
-        // window.setTimeout(() => { // Need to delay the scrolling a bit. Without this, something else would override scrolling and scroll back to 0.
-            container_element.scrollTo({
-                top: this.last_position.scroll_position,
-                behavior: "auto",
-            });
-        // }, 0); // 'timeout' can be 0 ms, no need to wait any longer.
-        // I guess there's no need for setTimeout() anymore, as rememberLastPosition() is now called after waiting for asynchronous tab content generating is finished.
-        // TODO: Remove the commented code after a while.
+        // Since Obsidian 1.13, the container element might not be attached to the document yet when display() is called
+        // (settings can also be opened in a new popout window), and scrolling a detached element has no effect. So wait
+        // until the container element is attached before scrolling.
+        const scroll_position = last_position.scroll_position;
+        const scrollToLastPosition = (attempts_left: number) => {
+            if (container_element.isConnected) {
+                container_element.scrollTo({
+                    top: scroll_position,
+                    behavior: "auto",
+                });
+            } else if (attempts_left > 0) {
+                window.setTimeout(() => scrollToLastPosition(attempts_left - 1), 20);
+            }
+        };
+        scrollToLastPosition(50); // Wait max ~1 second.
 
         // Listen to changes
         container_element.addEventListener("scroll", (event) => {

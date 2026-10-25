@@ -40,9 +40,11 @@ export abstract class SC_Modal extends Modal {
         if (this.plugin.settings.approve_modals_by_pressing_enter_key) {
             this.scope.register([], "enter", (event: KeyboardEvent) => {
                 // Check that no textarea is focused and no autocomplete menu is open.
+                // Use the modal's own document instead of the global 'document', because the modal might be in a popout window.
+                const modal_document = this.modalEl.ownerDocument;
                 if (
-                    0 === document.querySelectorAll("textarea:focus").length &&
-                    0 === document.querySelectorAll("div.SC-autocomplete").length
+                    0 === modal_document.querySelectorAll("textarea:focus").length &&
+                    0 === modal_document.querySelectorAll("div.SC-autocomplete").length
                 ) {
                     // No textareas with focus and no open autocomplete menus were found.
                     this.approve();
