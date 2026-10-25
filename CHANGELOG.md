@@ -18,8 +18,18 @@ Mind the order!
 ## [Unreleased]
 Features that are currently in development and not released yet. This does not include features that require longer planning, for which please see the [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas) sections.
 
-### To be Changed
+- Nothing at the moment.
+
+## [0.23.1] - 2026-10-25
+
+### Changed
  - [Updated copyright year to 2025 (#199)](https://github.com/Taitava/obsidian-shellcommands/issues/199).
+ - `npm run build` now builds the plugin using Rollup.
+
+### Fixed
+ - [Settings tabs blank on Obsidian 1.13+ (#483)](https://github.com/Taitava/obsidian-shellcommands/issues/483).
+ - [Settings: Error "No tab content was found with activate_tab_id" (#467)](https://github.com/Taitava/obsidian-shellcommands/issues/467).
+ - Settings opened in a popout window (Obsidian 1.13+): Variable autocomplete menu was not visible and selecting a suggestion did not insert it. Shell command search and remembering the last scroll position were also fixed.
 
 ## [0.23.0] - 2024-11-09
 
@@ -472,7 +482,8 @@ Features that are currently in development and not released yet. This does not i
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.23.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.23.1...HEAD
+[0.23.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.23.0...0.23.1
 [0.23.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.22.0...0.23.0
 [0.22.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.21.0...0.22.0
 [0.21.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.20.1...0.21.0
