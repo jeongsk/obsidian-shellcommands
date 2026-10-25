@@ -93,11 +93,12 @@ export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputEl
             }
 
             // Choose a method for doing the inserting
-            if (undefined !== document.execCommand) {
+            const input_document = input_element.ownerDocument; // Don't use the global 'document', because the input element might be in a popout window (e.g. settings are opened in a popout window since Obsidian 1.13).
+            if (undefined !== input_document.execCommand) {
                 // execCommand() is deprecated, but available.
                 // Use it to do the insertion, because this way an undo history can be preserved.
                 input_element.setSelectionRange(replace_start, caret_position); // First select the part that will be replaced, because execCommand() does not support defining positions. This adds a cumbersome selection step to the undo history, but at least undoing works.
-                document.execCommand("insertText", false, supplement);
+                input_document.execCommand("insertText", false, supplement);
             } else {
                 // execCommand() is not available anymore.
                 // Use setRangeText() to do the insertion. It will clear undo history, but at least the insertion works.
@@ -142,6 +143,19 @@ export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputEl
         className: "SC-autocomplete", // The component always has a class 'autocomplete', but add 'SC-autocomplete' so that SC's CSS can target 'SC-autocomplete', so it will not mess up stuff if Obsidian happens to have an element with class 'autocomplete'.
         keysToIgnore: [ 38 /* Up */, 13 /* Enter */, 27 /* Esc */, 16 /* Shift */, 17 /* Ctrl */, 18 /* Alt */, 20 /* CapsLock */, 91 /* WindowsKey */, 9 /* Tab */ ], // Defined just to prevent ignoring left and right keys.
         preventSubmit: true, // Prevents creating newlines in textareas when enter is pressed in the autocomplete menu.
+        customize: (input: HTMLInputElement | HTMLTextAreaElement, inputRect: DOMRect, container: HTMLDivElement) => {
+            // The autocomplete library always attaches the menu to the main window's document.body, and positions it
+            // using the main window's dimensions. But the input element might be in a popout window (settings are opened
+            // in a popout window since Obsidian 1.13), so move the menu to the input's document and recalculate the position.
+            const input_document = input.ownerDocument;
+            const input_window = input_document.defaultView ?? window;
+            if (container.parentNode !== input_document.body) {
+                input_document.body.appendChild(container);
+            }
+            container.style.top = (inputRect.top + input.offsetHeight + input_window.scrollY) + "px";
+            container.style.left = (inputRect.left + input_window.scrollX) + "px";
+            container.style.maxHeight = Math.max(0, input_window.innerHeight - (inputRect.top + input.offsetHeight)) + "px";
+        },
     });
 
     // Make the plugin able to close the menu if the plugin is disabled (or restarted).
